@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1706.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChargeGame", "ChargeGame.csproj", "{FC47AD3A-F737-4EBF-9981-C4FEBFFD4EA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Verdant", "..\verdant\Verdant\Verdant.csproj", "{7AC8782E-735B-427D-897C-420B1C8277CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC47AD3A-F737-4EBF-9981-C4FEBFFD4EA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC47AD3A-F737-4EBF-9981-C4FEBFFD4EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC47AD3A-F737-4EBF-9981-C4FEBFFD4EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC47AD3A-F737-4EBF-9981-C4FEBFFD4EA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AC8782E-735B-427D-897C-420B1C8277CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AC8782E-735B-427D-897C-420B1C8277CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AC8782E-735B-427D-897C-420B1C8277CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AC8782E-735B-427D-897C-420B1C8277CD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3EA19A2B-687A-463F-827D-096B6B8C0DE8}
+	EndGlobalSection
+EndGlobal

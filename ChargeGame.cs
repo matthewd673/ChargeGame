@@ -24,14 +24,19 @@ public class ChargeGame : Game
     {
         base.Initialize();
 
-        Renderer.Initialize(_graphics, 1);
+        Renderer.Initialize(_graphics, 2);
+
+        sceneManager = new();
+
+        PlayScene playScene = new();
+        sceneManager.AddScene(playScene);
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // TODO: use this.Content to load your game content here
+        Resources.LoadResources(Content);
     }
 
     protected override void Update(GameTime gameTime)
@@ -39,7 +44,7 @@ public class ChargeGame : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
+        sceneManager.ActiveScene.Update(gameTime);
 
         base.Update(gameTime);
     }
@@ -48,7 +53,11 @@ public class ChargeGame : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // TODO: Add your drawing code here
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+        sceneManager.ActiveScene.Draw(_spriteBatch);
+
+        _spriteBatch.End();
 
         base.Draw(gameTime);
     }

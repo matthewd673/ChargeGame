@@ -11,6 +11,8 @@ public class ChargeGame : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
+    private Color backgroundColor = new(55, 42, 57);
+
     private SceneManager sceneManager;
 
     public ChargeGame()
@@ -51,7 +53,7 @@ public class ChargeGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(backgroundColor);
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 

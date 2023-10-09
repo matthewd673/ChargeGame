@@ -1,4 +1,5 @@
-﻿using Verdant;
+﻿using System.Collections.Generic;
+using Verdant;
 using Verdant.Physics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,7 +13,7 @@ namespace ChargeGame
         private float moveSpeed = 0.005f;
 
         private const float minDashDist = 1f;
-        private const float maxDashDist = 200f;
+        private const float maxDashDist = 170f;
         private const float dashChargeTime = 2_000f;
 
         private bool dashChargeTimerCompleted = false;
@@ -30,13 +31,27 @@ namespace ChargeGame
         private float moveAngle = 0f;
 
         private bool dashing = false;
-        private Vec2 dashTarget = new();
+        private Vec2 dashStartPos = new();
+        private Vec2 dashTargetPos = new();
 
-		public Player(Vec2 position)
-			: base(Resources.Player, position, 16, 16, 1f)
+        private int _hitPoints = 3;
+        public int HitPoints
+        {
+            get { return _hitPoints; }
+            set
+            {
+                _hitPoints = value;
+                if (_hitPoints <= 0)
+                {
+                    Die();
+                }
+            }
+        }
+
+        public Player(Vec2 position)
+			: base(Resources.Player, position, 16, 16, 100f)
 		{
 			AngleFriction = 1f; // prevent rotation
-            Mass = 100f;
             Friction = 0.7f;
 
             dashChargeTimer = new(dashChargeTime, (t) => { dashChargeTimerCompleted = true; });
@@ -47,6 +62,7 @@ namespace ChargeGame
             base.Update();
 
             HandleInput();
+            HandleCollisions();
         }
 
         private void HandleInput()
@@ -79,25 +95,73 @@ namespace ChargeGame
             if (InputHandler.IsKeyFirstReleased(Keys.Space))
             {
                 dashing = true;
-                dashTarget = Position + GameMath.AngleToVec2(moveAngle) * CurrentDashDist;
+                dashStartPos = Position.Copy();
+                dashTargetPos = Position + GameMath.AngleToVec2(moveAngle) * CurrentDashDist;
 
                 // reset timer
                 dashChargeTimerCompleted = false;
                 dashChargeTimer.Reset();
             }
 
+            bool wasDashing = dashing;
             if (dashing)
             {
-                Vec2 stepVec = Position - dashTarget;
+                Vec2 stepVec = Position - dashTargetPos;
                 Acceleration = stepVec;
 
-                if (stepVec.Magnitude() < 0.01f)
+                if (GameMath.DistanceBetweenPoints(Position, dashTargetPos) < 0.3f)
                 {
                     dashing = false;
                 }
                 // 1.85 is the magic number, no idea why
-                Velocity = (Position - dashTarget) / (1 - 1.85f*Friction);
+                Velocity = (Position - dashTargetPos) / (1 - 1.85f*Friction);
             }
+
+            // check if dash just ended
+            if (wasDashing && !dashing)
+            {
+                Slash(dashStartPos, dashTargetPos);
+            }
+        }
+
+        private void Slash(Vec2 startPos, Vec2 endPos)
+        {
+            // try to slash all enemies within camera bounds
+            foreach (Enemy e in Manager.GetEntitiesInBounds<Enemy>(
+                Manager.Scene.Camera.Position,
+                (int) Manager.Scene.Camera.Width,
+                (int) Manager.Scene.Camera.Height))
+            {
+                Verdant.Debugging.Log.WriteLine(startPos, endPos);
+                if (GameMath.LineOnRectIntersection(startPos, endPos,
+                                                e.Position.X - e.Width / 2,
+                                                e.Position.Y - e.Height / 2,
+                                                e.Position.X + e.Width / 2,
+                                                e.Position.Y + e.Height / 2))
+                {
+                    e.Hit();
+                }
+            }
+        }
+
+        private void HandleCollisions()
+        {
+            // take damage from enemies while not dashing
+            if (!dashing)
+            {
+                // TODO
+            }
+        }
+
+        private void Hit()
+        {
+            HitPoints -= 1;
+        }
+
+        private void Die()
+        {
+            // TODO: fancy death
+            ForRemoval = true;
         }
 
         public override void Draw(SpriteBatch spriteBatch)

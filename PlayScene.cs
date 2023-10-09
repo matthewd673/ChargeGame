@@ -16,7 +16,7 @@ namespace ChargeGame
             Player player = new Player(new Vec2());
             EntityManager.AddEntity(player);
 
-            // GenerateWorld();
+            GenerateWorld();
         }
 
         private void GenerateWorld()
@@ -25,10 +25,10 @@ namespace ChargeGame
             {
                 for (int j = 0; j < 16; j++)
                 {
-                    if (GameMath.Random.Next(10) == 0)
+                    if (GameMath.Random.Next(20) == 0)
                     {
-                        Wall w = new Wall(new(i * 16, j * 16));
-                        EntityManager.AddEntity(w);
+                        Enemy e = new Enemy(new(i * 16, j * 16));
+                        EntityManager.AddEntity(e);
                     }
                 }
             }

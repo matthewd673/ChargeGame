@@ -10,6 +10,18 @@ namespace ChargeGame
 	public class Player : BoxEntity
 	{
 
+        struct SlashPath
+        {
+            public Vec2 Start { get; private set; }
+            public Vec2 End { get; private set; }
+
+            public SlashPath(Vec2 start, Vec2 end)
+            {
+                Start = start;
+                End = end;
+            }
+        }
+
         private float moveSpeed = 0.005f;
 
         private const float minDashDist = 1f;
@@ -33,6 +45,8 @@ namespace ChargeGame
         private bool dashing = false;
         private Vec2 dashStartPos = new();
         private Vec2 dashTargetPos = new();
+
+        private List<SlashPath> slashPaths = new();
 
         private int _hitPoints = 3;
         public int HitPoints
@@ -126,13 +140,16 @@ namespace ChargeGame
 
         private void Slash(Vec2 startPos, Vec2 endPos)
         {
+            // spawn path entity
+            SlashPath path = new(startPos.Copy(), endPos.Copy());
+            slashPaths.Add(path);
+
             // try to slash all enemies within camera bounds
             foreach (Enemy e in Manager.GetEntitiesInBounds<Enemy>(
                 Manager.Scene.Camera.Position,
                 (int) Manager.Scene.Camera.Width,
                 (int) Manager.Scene.Camera.Height))
             {
-                Verdant.Debugging.Log.WriteLine(startPos, endPos);
                 if (GameMath.LineOnRectIntersection(startPos, endPos,
                                                 e.Position.X - e.Width / 2,
                                                 e.Position.Y - e.Height / 2,
@@ -166,13 +183,34 @@ namespace ChargeGame
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            // draw aim line
             Renderer.DrawLine(spriteBatch,
                 (Vec2)Manager.Scene.Camera.GetRenderPosition(this),
                 (Vec2)Manager.Scene.Camera.GetRenderPosition(this) + GameMath.AngleToVec2(moveAngle) * CurrentDashDist * Renderer.WorldScale,
                 Color.White);
+
+            // draw slash path
+            foreach (SlashPath s in slashPaths)
+            {
+                int length = (int) GameMath.DistanceBetweenPoints(s.Start, s.End);
+                float angle = -GameMath.AngleBetweenPoints(s.Start, s.End) + MathHelper.PiOver2;
+                spriteBatch.Draw(Resources.Wall.Texture,
+                                 new Microsoft.Xna.Framework.Rectangle(
+                                     (int)s.Start.X * Renderer.WorldScale,
+                                     (int)s.Start.Y * Renderer.WorldScale,
+                                     length * Renderer.WorldScale,
+                                     4 * Renderer.WorldScale),
+                                 null,
+                                 Color.White,
+                                 angle,
+                                 Vector2.Zero,
+                                 SpriteEffects.None,
+                                 0
+                                 );
+            }
+
+            // draw player
             base.Draw(spriteBatch);
-			//DrawBody(spriteBatch);
-			//DrawPosition(spriteBatch);
         }
     }
 }

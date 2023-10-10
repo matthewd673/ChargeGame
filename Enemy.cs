@@ -1,4 +1,5 @@
-﻿using Verdant;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Verdant;
 using Verdant.Physics;
 
 namespace ChargeGame
@@ -37,6 +38,12 @@ namespace ChargeGame
 			// TODO: fancy death
 			ForRemoval = true;
 		}
-	}
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+			base.DrawBody(spriteBatch);
+        }
+    }
 }
 

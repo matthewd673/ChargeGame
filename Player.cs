@@ -26,17 +26,30 @@ namespace ChargeGame
 
         private const float minDashDist = 1f;
         private const float maxDashDist = 170f;
+        private const float maxChainDashDist = maxDashDist * 1.1f;
         private const float dashChargeTime = 2_000f;
 
         private bool dashChargeTimerCompleted = false;
         private Timer dashChargeTimer;
+        private bool chainingDash = false;
         private float CurrentDashDist
         {
             get
             {
-                return dashChargeTimerCompleted ?
-                       maxDashDist :
-                       dashChargeTimer.ElapsedTime / dashChargeTimer.Duration * (maxDashDist - minDashDist) + minDashDist;
+                // count up towards maximum when not chaining dash
+                if (!chainingDash)
+                {
+                    return dashChargeTimerCompleted ?
+                           maxDashDist :
+                           dashChargeTimer.ElapsedTime / dashChargeTimer.Duration * (maxDashDist - minDashDist) + minDashDist;
+                }
+                // count down towards zero when chaining dash
+                else
+                {
+                    return dashChargeTimerCompleted ?
+                           0 :
+                           (1 - dashChargeTimer.ElapsedTime / dashChargeTimer.Duration) * (maxChainDashDist - minDashDist) + minDashDist;
+                }
             }
         }
 
@@ -47,6 +60,8 @@ namespace ChargeGame
         private Vec2 dashTargetPos = new();
 
         private List<SlashPath> slashPaths = new();
+        private List<Vec2> slashPoints = new();
+        private int lastSlashCount = 0;
 
         private int _hitPoints = 3;
         public int HitPoints
@@ -67,6 +82,7 @@ namespace ChargeGame
 		{
 			AngleFriction = 1f; // prevent rotation
             Friction = 0.7f;
+            Trigger = true;
 
             dashChargeTimer = new(dashChargeTime, (t) => { dashChargeTimerCompleted = true; });
 		}
@@ -102,8 +118,16 @@ namespace ChargeGame
             // if the space key is held past the charge duration
             if (InputHandler.IsKeyFirstPressed(Keys.Space))
             {
-                dashChargeTimerCompleted = false;
-                dashChargeTimer.Start();
+                if (chainingDash && CurrentDashDist == 0)
+                {
+                    chainingDash = false;
+                }
+
+                if (!chainingDash)
+                {
+                    dashChargeTimerCompleted = false;
+                    dashChargeTimer.Start();
+                }
             }
 
             if (InputHandler.IsKeyFirstReleased(Keys.Space))
@@ -140,7 +164,10 @@ namespace ChargeGame
 
         private void Slash(Vec2 startPos, Vec2 endPos)
         {
-            // spawn path entity
+            // reset last hit counter
+            lastSlashCount = 0;
+
+            // mark slash path
             SlashPath path = new(startPos.Copy(), endPos.Copy());
             slashPaths.Add(path);
 
@@ -150,14 +177,29 @@ namespace ChargeGame
                 (int) Manager.Scene.Camera.Width,
                 (int) Manager.Scene.Camera.Height))
             {
-                if (GameMath.LineOnRectIntersection(startPos, endPos,
-                                                e.Position.X - e.Width / 2,
-                                                e.Position.Y - e.Height / 2,
-                                                e.Position.X + e.Width / 2,
-                                                e.Position.Y + e.Height / 2))
+                List<Vec2> points = GameMath.LineOnRectIntersectionPoints(startPos, endPos,
+                                                                            e.Position.X - e.Width / 2,
+                                                                            e.Position.Y - e.Height / 2,
+                                                                            e.Position.X + e.Width / 2,
+                                                                            e.Position.Y + e.Height / 2);
+                slashPoints.AddRange(points);
+
+                if (points.Count > 0)
                 {
                     e.Hit();
                 }
+
+                lastSlashCount += points.Count;
+            }
+
+            if (lastSlashCount > 0)
+            {
+                chainingDash = true;
+                dashChargeTimer.Restart();
+            }
+            else
+            {
+                chainingDash = false;
             }
         }
 
@@ -199,7 +241,7 @@ namespace ChargeGame
                                      (int)s.Start.X * Renderer.WorldScale,
                                      (int)s.Start.Y * Renderer.WorldScale,
                                      length * Renderer.WorldScale,
-                                     4 * Renderer.WorldScale),
+                                     2 * Renderer.WorldScale),
                                  null,
                                  Color.White,
                                  angle,
@@ -207,6 +249,17 @@ namespace ChargeGame
                                  SpriteEffects.None,
                                  0
                                  );
+            }
+
+            foreach (Vec2 p in slashPoints)
+            {
+                spriteBatch.Draw(Renderer.Pixel,
+                                 new Microsoft.Xna.Framework.Rectangle(
+                                     Manager.Scene.Camera.GetRenderPosition(p).X,
+                                     Manager.Scene.Camera.GetRenderPosition(p).Y,
+                                     4,
+                                     4),
+                                 Color.Magenta);
             }
 
             // draw player

@@ -26,7 +26,7 @@ namespace ChargeGame
 	class PumpkinLight : Entity
 	{
 		public PumpkinLight(Vec2 position)
-			: base(Resources.PumpkinLightStatic, position)
+			: base(Resources.PumpkinLightFlicker, position)
 		{
 			ZIndexMode = EntityManager.ZIndexMode.Manual;
 			ZIndex = int.MinValue;

@@ -13,8 +13,8 @@ namespace ChargeGame
         {
             base.Initialize();
 
-            //Player player = new Player(new Vec2());
-            //EntityManager.AddEntity(player);
+            Player player = new Player(new Vec2());
+            EntityManager.AddEntity(player);
 
             GenerateWorld();
         }

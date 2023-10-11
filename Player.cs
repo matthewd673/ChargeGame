@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verdant;
 using Verdant.Physics;
 using Microsoft.Xna.Framework;
@@ -9,22 +10,9 @@ namespace ChargeGame
 {
 	public class Player : BoxEntity
 	{
-
-        struct SlashPath
-        {
-            public Vec2 Start { get; private set; }
-            public Vec2 End { get; private set; }
-
-            public SlashPath(Vec2 start, Vec2 end)
-            {
-                Start = start;
-                End = end;
-            }
-        }
-
         private float moveSpeed = 0.005f;
 
-        private const float minDashDist = 1f;
+        private const float minDashDist = 0f;
         private const float maxDashDist = 170f;
         private const float maxChainDashDist = maxDashDist * 1.1f;
         private const float dashChargeTime = 2_000f;
@@ -79,7 +67,7 @@ namespace ChargeGame
         }
 
         public Player(Vec2 position)
-			: base(Resources.Player, position, 16, 16, 100f)
+			: base(Resources.PlayerIdle, position, 12, 19, 100f)
 		{
 			AngleFriction = 1f; // prevent rotation
             Friction = 0.7f;
@@ -235,21 +223,40 @@ namespace ChargeGame
             // draw slash path
             foreach (SlashPath s in slashPaths)
             {
-                int length = (int) GameMath.DistanceBetweenPoints(s.Start, s.End);
-                float angle = -GameMath.AngleBetweenPoints(s.Start, s.End) + MathHelper.PiOver2;
-                spriteBatch.Draw(Resources.Wall.Texture,
+                //int length = (int) GameMath.DistanceBetweenPoints(s.Start, s.End);
+                //float angle = -GameMath.AngleBetweenPoints(s.Start, s.End) + MathHelper.PiOver2;
+                //spriteBatch.Draw(Resources.Slash.Texture,
+                //                 new Microsoft.Xna.Framework.Rectangle(
+                //                     (int)s.Start.X * Renderer.WorldScale,
+                //                     (int)s.Start.Y * Renderer.WorldScale,
+                //                     length * Renderer.WorldScale,
+                //                     2 * Renderer.WorldScale),
+                //                 null,
+                //                 Color.White,
+                //                 angle,
+                //                 Vector2.Zero,
+                //                 SpriteEffects.None,
+                //                 0
+                //                 );
+
+                foreach ((Vec2 vA, Vec2 vB) in s.VisualPoints)
+                {
+                    int vLength = (int) GameMath.DistanceBetweenPoints(vA, vB);
+                    float vAngle = -GameMath.AngleBetweenPoints(vA, vB) + MathHelper.PiOver2;
+                    spriteBatch.Draw(Resources.Slash.Texture,
                                  new Microsoft.Xna.Framework.Rectangle(
-                                     (int)s.Start.X * Renderer.WorldScale,
-                                     (int)s.Start.Y * Renderer.WorldScale,
-                                     length * Renderer.WorldScale,
-                                     2 * Renderer.WorldScale),
+                                     (int)vA.X * Renderer.WorldScale,
+                                     (int)vA.Y * Renderer.WorldScale,
+                                     vLength * Renderer.WorldScale,
+                                     2),
                                  null,
                                  Color.White,
-                                 angle,
+                                 vAngle,
                                  Vector2.Zero,
                                  SpriteEffects.None,
                                  0
                                  );
+                }
             }
 
             foreach (Vec2 p in slashPoints)
@@ -265,6 +272,62 @@ namespace ChargeGame
 
             // draw player
             base.Draw(spriteBatch);
+        }
+    }
+
+    class SlashPath
+    {
+        public Vec2 Start { get; private set; }
+        public Vec2 End { get; private set; }
+
+        public List<(Vec2, Vec2)> VisualPoints { get; private set; }
+
+        public SlashPath(Vec2 start, Vec2 end)
+        {
+            Start = start;
+            End = end;
+
+            CalculateVisualPoints();
+        }
+
+        private void CalculateVisualPoints()
+        {
+            VisualPoints = new();
+
+            const float segmentLength = 4f;
+            //float slashLength = GameMath.DistanceBetweenPoints(Start, End);
+            float slashAngle = GameMath.AngleBetweenPoints(Start, End);
+
+            // add randomized segments from the start to the end of the slash
+            Vec2 lastSegEnd = Start;
+            while (GameMath.DistanceBetweenPoints(lastSegEnd, End) > 2f)
+            {
+                // add some random variation to the segment length
+                float segLength = segmentLength * GameMath.RandomFloat(0.8f, 2f);
+
+                // check if we are finishing the path and closing the gap to the player
+                bool isLastSegment = false;
+                float distToEnd = GameMath.DistanceBetweenPoints(lastSegEnd, End);
+                if (segLength > distToEnd)
+                {
+                    segLength = distToEnd;
+                    isLastSegment = true;
+                }
+
+                // start where the last segment ended
+                Vec2 segStart = lastSegEnd.Copy();
+
+                float segAngle = GameMath.AngleBetweenPoints(segStart, End);
+                // if not last segment add some random angle variation
+                if (!isLastSegment)
+                {
+                    segAngle *= GameMath.RandomFloat(0.5f, 1.5f);
+                }
+                Vec2 segEnd = segStart + GameMath.AngleToVec2(segAngle) * segLength;
+                lastSegEnd = segEnd;
+
+                VisualPoints.Add((segStart, segEnd));
+            }
         }
     }
 }

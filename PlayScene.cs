@@ -4,7 +4,20 @@ namespace ChargeGame
 {
 	public class PlayScene : Scene
 	{
-		public PlayScene() : base("play")
+
+        private long _score = 0;
+        public long Score
+        {
+            get { return _score; }
+            set
+            {
+                _score = value;
+                scoreDisplay.Value = _score;
+            }
+        }
+        private UINumericDisplay scoreDisplay;
+
+        public PlayScene() : base("play")
 		{
             // Empty
 		}
@@ -17,6 +30,8 @@ namespace ChargeGame
             EntityManager.AddEntity(player);
 
             GenerateWorld();
+
+            GenerateUI();
         }
 
         private void GenerateWorld()
@@ -36,6 +51,14 @@ namespace ChargeGame
 
             DemonPumpkin demonPumpkin = new(new(100, 100));
             EntityManager.AddEntity(demonPumpkin);
+        }
+
+        private void GenerateUI()
+        {
+            scoreDisplay = new(new(8, 8), Resources.NumbersBig);
+            scoreDisplay.FontSheetOffset = 10;
+
+            UIManager.AddElement(scoreDisplay);
         }
     }
 }

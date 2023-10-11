@@ -10,6 +10,21 @@ namespace ChargeGame
 {
 	public class Player : BoxEntity
 	{
+
+        private PlayScene PlayScene
+        {
+            get
+            {
+                return (PlayScene)Manager.Scene;
+            }
+        }
+
+        private const int scoreEnemy = 22;
+        private const int scoreGem = 44;
+        private const int scoreCross = 8;
+        private const int scoreActivatePumpkin = 100;
+        private float scoreMultiplier = 1;
+
         private float moveSpeed = 0.005f;
 
         private const float minDashDist = 0f;
@@ -87,6 +102,7 @@ namespace ChargeGame
                 {
                     slashPaths.Clear();
                     slashPoints.Clear();
+                    scoreMultiplier = 1;
                 }
             });
 
@@ -112,15 +128,15 @@ namespace ChargeGame
             moveAngle = GameMath.AngleBetweenPoints(Position, mouseWorldPos);
 
             // movement
-            if (InputHandler.KeyboardState.IsKeyDown(Keys.W))
-            {
-                Acceleration = GameMath.AngleToVec2(moveAngle) * moveSpeed;
-            }
-            else
-            {
+            //if (InputHandler.KeyboardState.IsKeyDown(Keys.W))
+            //{
+            //    Acceleration = GameMath.AngleToVec2(moveAngle) * moveSpeed;
+            //}
+            //else
+            //{
                 Acceleration.X = 0;
                 Acceleration.Y = 0;
-            }
+            //}
 
             // only start timer once
             // this is to prevent the timer from restarting
@@ -213,6 +229,35 @@ namespace ChargeGame
                 if (points.Count > 0)
                 {
                     e.Hit();
+                    PlayScene.Score += (long)(scoreEnemy * scoreMultiplier);
+                }
+
+                if (lastSlashCount >= 1)
+                {
+                    scoreMultiplier += 0.2f;
+                }
+
+                lastSlashCount += points.Count;
+            }
+
+            // try to slash all gems within camera bounds
+            foreach (Gem g in Manager.GetEntitiesInBounds<Gem>(
+                Manager.Scene.Camera.Position,
+                (int) Manager.Scene.Camera.Width,
+                (int) Manager.Scene.Camera.Height))
+            {
+                List<Vec2> points = GameMath.LineOnRectIntersectionPoints(startPos, endPos,
+                                                                          g.Position.X - g.Width / 2,
+                                                                          g.Position.Y - g.Height / 2,
+                                                                          g.Position.X + g.Width / 2,
+                                                                          g.Position.Y + g.Height / 2);
+                slashPoints.AddRange(points);
+
+                if (points.Count > 0)
+                {
+                    g.Collect();
+                    scoreMultiplier += scoreMultiplier += 0.5f;
+                    PlayScene.Score += (long)(scoreGem * scoreMultiplier);
                 }
 
                 lastSlashCount += points.Count;
@@ -230,6 +275,7 @@ namespace ChargeGame
                 // missed the chain
                 slashPaths.Clear();
                 slashPoints.Clear();
+                scoreMultiplier = 1;
             }
         }
 
@@ -244,6 +290,10 @@ namespace ChargeGame
             float velAngle = GameMath.RandomFloat(0, MathHelper.TwoPi);
             gem.Velocity = GameMath.AngleToVec2(velAngle) * 8f;
             Manager.AddEntity(gem);
+
+            // add score
+            scoreMultiplier += 1;
+            PlayScene.Score += (long)(scoreCross * scoreMultiplier);
         }
 
         private void HandleCollisions()

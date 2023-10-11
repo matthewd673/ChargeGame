@@ -20,6 +20,8 @@ namespace ChargeGame
 
 		public static Animation Gem { get; private set; }
 
+		public static SpriteSheet NumbersBig { get; private set; }
+		public static SpriteSheet NumbersSmall { get; private set; }
 		public static Sprite Cursor { get; private set; }
 
 		public static void LoadResources(ContentManager content)
@@ -42,6 +44,8 @@ namespace ChargeGame
 			Gem = new(content.Load<Texture2D>("gem"),
 					  10, 12, looping: true);
 
+			NumbersBig = new(content.Load<Texture2D>("numbers_big"), 7);
+			NumbersSmall = new(content.Load<Texture2D>("numbers_small"), 4);
 			Cursor = content.Load<Texture2D>("cursor");
 		}
 	}

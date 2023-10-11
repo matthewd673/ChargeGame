@@ -12,6 +12,11 @@ namespace ChargeGame
 			ZIndexMode = EntityManager.ZIndexMode.Bottom;
 			Friction = 0.1f;
 		}
+
+		public void Collect()
+		{
+			ForRemoval = true; // TODO: fancy collect animation
+		}
 	}
 }
 

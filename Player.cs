@@ -52,6 +52,10 @@ namespace ChargeGame
         private List<Vec2> slashPoints = new();
         private int lastSlashCount = 0;
 
+        private bool slashAnimationTimerCompleted = false;
+        private const float slashAnimationDuration = 200f;
+        private Timer slashAnimationTimer;
+
         private int _hitPoints = 3;
         public int HitPoints
         {
@@ -73,8 +77,16 @@ namespace ChargeGame
             Friction = 0.7f;
             Trigger = true;
 
-            dashChargeTimer = new(dashChargeTime, (t) => { dashChargeTimerCompleted = true; });
-		}
+            dashChargeTimer = new(dashChargeTime, (t) =>
+            {
+                dashChargeTimerCompleted = true;
+            });
+
+            slashAnimationTimer = new(slashAnimationDuration, (t) =>
+            {
+                slashAnimationTimerCompleted = true;
+            });
+        }
 
         public override void Update()
         {
@@ -128,6 +140,10 @@ namespace ChargeGame
                 // reset timer
                 dashChargeTimerCompleted = false;
                 dashChargeTimer.Reset();
+
+                // begin slash animation
+                slashAnimationTimerCompleted = false;
+                slashAnimationTimer.Restart();
             }
 
             bool wasDashing = dashing;
@@ -220,27 +236,22 @@ namespace ChargeGame
                 (Vec2)Manager.Scene.Camera.GetRenderPosition(this) + GameMath.AngleToVec2(moveAngle) * CurrentDashDist * Renderer.WorldScale,
                 Color.White);
 
-            // draw slash path
-            foreach (SlashPath s in slashPaths)
+            for (int i = 0; i < slashPaths.Count; i++)
             {
-                //int length = (int) GameMath.DistanceBetweenPoints(s.Start, s.End);
-                //float angle = -GameMath.AngleBetweenPoints(s.Start, s.End) + MathHelper.PiOver2;
-                //spriteBatch.Draw(Resources.Slash.Texture,
-                //                 new Microsoft.Xna.Framework.Rectangle(
-                //                     (int)s.Start.X * Renderer.WorldScale,
-                //                     (int)s.Start.Y * Renderer.WorldScale,
-                //                     length * Renderer.WorldScale,
-                //                     2 * Renderer.WorldScale),
-                //                 null,
-                //                 Color.White,
-                //                 angle,
-                //                 Vector2.Zero,
-                //                 SpriteEffects.None,
-                //                 0
-                //                 );
-
+                SlashPath s = slashPaths[i];
+                float segProgress = 0f;
+                float segInc = 1f / s.VisualPoints.Count;
                 foreach ((Vec2 vA, Vec2 vB) in s.VisualPoints)
                 {
+                    segProgress += segInc;
+                    // skip drawing segments that shouldn't appear yet
+                    if (!slashAnimationTimerCompleted && // if timer completed, draw entire segment
+                        i == slashPaths.Count - 1 && // only animate the last slash in the list
+                        segProgress > slashAnimationTimer.ElapsedTime / slashAnimationTimer.Duration)
+                    {
+                        continue;
+                    }
+
                     int vLength = (int) GameMath.DistanceBetweenPoints(vA, vB);
                     float vAngle = -GameMath.AngleBetweenPoints(vA, vB) + MathHelper.PiOver2;
                     spriteBatch.Draw(Resources.Slash.Texture,
@@ -248,7 +259,7 @@ namespace ChargeGame
                                      (int)vA.X * Renderer.WorldScale,
                                      (int)vA.Y * Renderer.WorldScale,
                                      vLength * Renderer.WorldScale,
-                                     2),
+                                     1),
                                  null,
                                  Color.White,
                                  vAngle,

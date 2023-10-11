@@ -22,10 +22,11 @@ namespace ChargeGame
 		}
 
 		public Enemy(Vec2 position)
-			: base(Resources.Enemy, position, 16, 16, 100f)
+			: base(Resources.Enemy, position, 7, 21, 100f)
 		{
             AngleFriction = 1f; // prevent rotation
             Friction = 0.7f;
+			ZIndexMode = EntityManager.ZIndexMode.Bottom;
         }
 
 		public void Hit()

@@ -21,7 +21,7 @@ namespace ChargeGame
 
         private void GenerateWorld()
         {
-            // generate walls
+            // generate enemies (TODO: temp)
             for (int i = 0; i < 16; i++)
             {
                 for (int j = 0; j < 16; j++)
@@ -29,7 +29,7 @@ namespace ChargeGame
                     if (GameMath.Random.Next(20) == 0)
                     {
                         Enemy e = new Enemy(new(i * 16, j * 16));
-                        //EntityManager.AddEntity(e);
+                        EntityManager.AddEntity(e);
                     }
                 }
             }

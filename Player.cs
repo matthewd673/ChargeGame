@@ -76,10 +76,18 @@ namespace ChargeGame
 			AngleFriction = 1f; // prevent rotation
             Friction = 0.7f;
             Trigger = true;
+            ZIndexMode = EntityManager.ZIndexMode.Bottom;
 
             dashChargeTimer = new(dashChargeTime, (t) =>
             {
                 dashChargeTimerCompleted = true;
+
+                // dash chaining time expired
+                if (chainingDash)
+                {
+                    slashPaths.Clear();
+                    slashPoints.Clear();
+                }
             });
 
             slashAnimationTimer = new(slashAnimationDuration, (t) =>
@@ -157,7 +165,7 @@ namespace ChargeGame
                     dashing = false;
                 }
                 // 1.85 is the magic number, no idea why
-                Velocity = (Position - dashTargetPos) / (1 - 1.85f*Friction);
+                Velocity = (Position - dashTargetPos) / (1 - 1.85f*Friction); // magic number
             }
 
             // check if dash just ended
@@ -174,7 +182,20 @@ namespace ChargeGame
 
             // mark slash path
             SlashPath path = new(startPos.Copy(), endPos.Copy());
+
+            // add path cross points if this new path crosses any others
+            foreach (SlashPath s in slashPaths)
+            {
+                Vec2 cross = GameMath.LineIntersectionPoint(path.Start, path.End, s.Start, s.End);
+                if (cross != null) // the two paths did cross
+                {
+                    CrossPaths(cross);
+                }
+            }
+
+            // ...and now that thats done the new path can be added to the list
             slashPaths.Add(path);
+
 
             // try to slash all enemies within camera bounds
             foreach (Enemy e in Manager.GetEntitiesInBounds<Enemy>(
@@ -205,7 +226,24 @@ namespace ChargeGame
             else
             {
                 chainingDash = false;
+
+                // missed the chain
+                slashPaths.Clear();
+                slashPoints.Clear();
             }
+        }
+
+        private void CrossPaths(Vec2 cross)
+        {
+            // create spark animation
+            Spark spark = new(cross.Copy());
+            Manager.AddEntity(spark);
+
+            // shoot out gem
+            Gem gem = new(cross.Copy());
+            float velAngle = GameMath.RandomFloat(0, MathHelper.TwoPi);
+            gem.Velocity = GameMath.AngleToVec2(velAngle) * 8f;
+            Manager.AddEntity(gem);
         }
 
         private void HandleCollisions()
@@ -260,7 +298,6 @@ namespace ChargeGame
                              new Vector2(Resources.AimHead.Width / 2, // magic number to fix position
                                          Resources.AimHead.Height - 3 // another magic number
                                          ),
-                             //Vector2.Zero,
                              SpriteEffects.None,
                              0
                              );
@@ -345,7 +382,7 @@ namespace ChargeGame
             while (GameMath.DistanceBetweenPoints(lastSegEnd, End) > 2f)
             {
                 // add some random variation to the segment length
-                float segLength = segmentLength * GameMath.RandomFloat(0.8f, 2f);
+                float segLength = segmentLength * GameMath.RandomFloat(0.8f, 3f);
 
                 // check if we are finishing the path and closing the gap to the player
                 bool isLastSegment = false;
@@ -363,7 +400,7 @@ namespace ChargeGame
                 // if not last segment add some random angle variation
                 if (!isLastSegment)
                 {
-                    segAngle *= GameMath.RandomFloat(0.5f, 1.5f);
+                    segAngle *= GameMath.RandomFloat(0.7f, 1.3f);
                 }
                 Vec2 segEnd = segStart + GameMath.AngleToVec2(segAngle) * segLength;
                 lastSegEnd = segEnd;

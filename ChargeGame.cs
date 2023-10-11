@@ -11,7 +11,7 @@ public class ChargeGame : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    private Color backgroundColor = new(55, 42, 57);
+    private Color backgroundColor = Color.Black;
 
     private SceneManager sceneManager;
 

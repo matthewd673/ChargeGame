@@ -36,19 +36,20 @@ namespace ChargeGame
         {
             get
             {
+                float timePercent = dashChargeTimer.ElapsedTime / dashChargeTimer.Duration;
                 // count up towards maximum when not chaining dash
                 if (!chainingDash)
                 {
                     return dashChargeTimerCompleted ?
                            maxDashDist :
-                           dashChargeTimer.ElapsedTime / dashChargeTimer.Duration * (maxDashDist - minDashDist) + minDashDist;
+                           timePercent * (maxDashDist - minDashDist) + minDashDist;
                 }
                 // count down towards zero when chaining dash
                 else
                 {
                     return dashChargeTimerCompleted ?
                            0 :
-                           (1 - dashChargeTimer.ElapsedTime / dashChargeTimer.Duration) * (maxChainDashDist - minDashDist) + minDashDist;
+                           (1 - timePercent) * (maxChainDashDist - minDashDist) + minDashDist;
                 }
             }
         }

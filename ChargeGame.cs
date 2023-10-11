@@ -19,19 +19,21 @@ public class ChargeGame : Game
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
+        IsMouseVisible = false;
     }
 
     protected override void Initialize()
     {
         base.Initialize();
 
-        Renderer.Initialize(_graphics, 2);
+        Renderer.Initialize(_graphics, 2, 2);
 
         sceneManager = new();
 
         PlayScene playScene = new();
         sceneManager.AddScene(playScene);
+
+        Renderer.Cursor = Resources.Cursor;
     }
 
     protected override void LoadContent()

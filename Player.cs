@@ -53,7 +53,7 @@ namespace ChargeGame
         private int lastSlashCount = 0;
 
         private bool slashAnimationTimerCompleted = false;
-        private const float slashAnimationDuration = 200f;
+        private const float slashAnimationDuration = 100f;
         private Timer slashAnimationTimer;
 
         private int _hitPoints = 3;
@@ -230,12 +230,42 @@ namespace ChargeGame
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            float aimVisAngle = -moveAngle + MathHelper.PiOver2;
+            Vec2Int renderPosition = Manager.Scene.Camera.GetRenderPosition(this);
+            Vec2Int aimHeadPosition = (Vec2Int)((Vec2)renderPosition + GameMath.AngleToVec2(-aimVisAngle + MathHelper.PiOver2) * CurrentDashDist * Renderer.WorldScale);
             // draw aim line
-            Renderer.DrawLine(spriteBatch,
-                (Vec2)Manager.Scene.Camera.GetRenderPosition(this),
-                (Vec2)Manager.Scene.Camera.GetRenderPosition(this) + GameMath.AngleToVec2(moveAngle) * CurrentDashDist * Renderer.WorldScale,
-                Color.White);
+            spriteBatch.Draw(Resources.Aim.Texture,
+                             new Microsoft.Xna.Framework.Rectangle(
+                                 renderPosition.X,
+                                 renderPosition.Y,
+                                 (int)(CurrentDashDist * Renderer.WorldScale),
+                                 Renderer.WorldScale),
+                             null,
+                             Color.White,
+                             aimVisAngle,
+                             Vector2.Zero,
+                             SpriteEffects.None,
+                             0
+                             );
+            // draw aim arrow
+            spriteBatch.Draw(Resources.AimHead.Texture,
+                             new Microsoft.Xna.Framework.Rectangle(
+                                 aimHeadPosition.X,
+                                 aimHeadPosition.Y,
+                                 Resources.AimHead.Width * Renderer.WorldScale,
+                                 Resources.AimHead.Height * Renderer.WorldScale),
+                             null,
+                             Color.White,
+                             aimVisAngle,
+                             new Vector2(Resources.AimHead.Width / 2, // magic number to fix position
+                                         Resources.AimHead.Height - 3 // another magic number
+                                         ),
+                             //Vector2.Zero,
+                             SpriteEffects.None,
+                             0
+                             );
 
+            // draw slash paths
             for (int i = 0; i < slashPaths.Count; i++)
             {
                 SlashPath s = slashPaths[i];
@@ -270,6 +300,7 @@ namespace ChargeGame
                 }
             }
 
+            // draw slash points
             foreach (Vec2 p in slashPoints)
             {
                 spriteBatch.Draw(Renderer.Pixel,

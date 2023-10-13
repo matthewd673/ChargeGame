@@ -45,6 +45,7 @@ namespace ChargeGame
         public List<Vec2> SpawnCandidates { get; private set; }
 
         private Player player;
+        private DemonPumpkin demonPumpkin;
 
         private Director director;
 
@@ -319,7 +320,7 @@ namespace ChargeGame
                 }
             }
             SpawnCandidates.Remove(centerMost); // no longer a spawn candidate
-            DemonPumpkin demonPumpkin = new(centerMost.Copy());
+            demonPumpkin = new(centerMost.Copy(), null);
             EntityManager.AddEntity(demonPumpkin);
 
             // spawn player
@@ -334,6 +335,7 @@ namespace ChargeGame
                 }
             }
             player = new(possiblePlayerSpawns[GameMath.Random.Next(possiblePlayerSpawns.Count)]);
+            demonPumpkin.Player = player;
             EntityManager.AddEntity(player);
         }
 
@@ -373,6 +375,11 @@ namespace ChargeGame
             stack.AddElement(scoreDisplay);
 
             UIManager.AddElement(stack);
+        }
+
+        public void RegisterEnemyKill()
+        {
+            demonPumpkin.Sacrifices += 1;
         }
     }
 }

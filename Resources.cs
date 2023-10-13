@@ -21,6 +21,8 @@ namespace ChargeGame
 		public static Sprite DemonPumpkin { get; private set; }
 		public static Sprite PumpkinLightStatic { get; private set; }
 		public static Animation PumpkinLightFlicker { get; private set; }
+		public static Sprite Pip { get; private set; }
+		public static SpriteSheet ChargeBar { get; private set; }
 
 		public static Animation Gem { get; private set; }
 
@@ -51,6 +53,8 @@ namespace ChargeGame
 			PumpkinLightStatic = content.Load<Texture2D>("pumpkin_light_static");
 			PumpkinLightFlicker = new(content.Load<Texture2D>("pumpkin_light_flicker"),
 									  49, 24, looping: true);
+			Pip = content.Load<Texture2D>("pip");
+			ChargeBar = new(content.Load<Texture2D>("charge_bar"), 1);
 
 			Gem = new(content.Load<Texture2D>("gem"),
 					  10, 12, looping: true);

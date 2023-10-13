@@ -32,8 +32,8 @@ public class ChargeGame : Game
 
         sceneManager = new();
 
-        PlayScene playScene = new();
-        sceneManager.AddScene(playScene);
+        TitleScene titleScene = new();
+        sceneManager.AddScene(titleScene);
 
         Renderer.Cursor = Resources.Cursor;
     }

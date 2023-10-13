@@ -165,7 +165,7 @@ namespace ChargeGame
                 if (dashCollisionPos != null)
                 {
                     // subtraction just offsets a bit to prevent hopping the wall
-                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle)*4;
+                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle) * 8;
                 }
 
                 // reset timer
@@ -263,6 +263,7 @@ namespace ChargeGame
                 if (intersection)
                 {
                     e.Hit();
+                    PlayScene.RegisterEnemyKill();
                     lastSlashCount += 1;
                     PlayScene.Score += (long)(scoreEnemy * scoreMultiplier);
                 }
@@ -353,12 +354,19 @@ namespace ChargeGame
         private void Hit()
         {
             HitPoints -= 1;
-            Manager.Scene.Camera.SetShake(3, 400f);
+            if (HitPoints > 0)
+                Manager.Scene.Camera.SetShake(3, 400f);
         }
 
         private void Die()
         {
-            // TODO: fancy death
+            Scene scene = Manager.Scene;
+            scene.Camera.SetShake(11f, 1800f);
+            Timer t = new(1500f, (t) =>
+            {
+                scene.Manager.ActiveID = "title";
+            });
+            t.Start();
             ForRemoval = true;
         }
 

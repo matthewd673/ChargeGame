@@ -9,7 +9,7 @@ namespace ChargeGame
 		private Player player;
 
 		private float spawnCooldown = 3_500f;
-		private float spawnAmount = 2;
+		private int spawnAmount = 2;
 		private Timer spawnTimer;
 
 		public Director(EntityManager entityManager, List<Vec2> spawnCandidates, Player player)
@@ -25,7 +25,7 @@ namespace ChargeGame
 		private void SpawnTimerCallback(Timer t)
         {
             // spawn enemies
-            for (int i = 0; i < spawnAmount; i++)
+            for (int i = 0; i < spawnAmount + GameMath.Random.Next(spawnAmount); i++)
             {
                 int spawnIndex = GameMath.Random.Next(spawnCandidates.Count);
                 Vec2 s = spawnCandidates[spawnIndex];

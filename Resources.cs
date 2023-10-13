@@ -33,6 +33,10 @@ namespace ChargeGame
 		public static SpriteSheet Heart { get; private set; }
 		public static Sprite Cursor { get; private set; }
 
+		public static Sprite Logo { get; private set; }
+		public static Sprite HighScore { get; private set; }
+		public static Sprite PressSpace { get; private set; }
+
 		public static void LoadResources(ContentManager content)
 		{
 			PlayerIdle = new(content.Load<Texture2D>("player_idle"),
@@ -65,7 +69,11 @@ namespace ChargeGame
 			NumbersSmall = new(content.Load<Texture2D>("numbers_small"), 4);
 			Heart = new(content.Load<Texture2D>("heart"), 13);
 			Cursor = content.Load<Texture2D>("cursor");
-		}
-	}
+
+			Logo = content.Load<Texture2D>("logo");
+			HighScore = content.Load<Texture2D>("high_score");
+			PressSpace = content.Load<Texture2D>("press_space");
+        }
+    }
 }
 

@@ -28,6 +28,8 @@ public class ChargeGame : Game
     {
         base.Initialize();
 
+        Window.Title = "harvest - a game by Matt Daly";
+
         Renderer.Initialize(_graphics, 2, 2);
 
         sceneManager = new();

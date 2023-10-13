@@ -361,12 +361,18 @@ namespace ChargeGame
         private void Die()
         {
             Scene scene = Manager.Scene;
+            if (PlayScene.Score > TitleScene.HighScore)
+            {
+                TitleScene.HighScore = PlayScene.Score;
+            }
+
             scene.Camera.SetShake(11f, 1800f);
             Timer t = new(1500f, (t) =>
             {
                 scene.Manager.ActiveID = "title";
             });
             t.Start();
+
             ForRemoval = true;
         }
 

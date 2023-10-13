@@ -249,6 +249,11 @@ namespace ChargeGame
                 (int) Manager.Scene.Camera.Width,
                 (int) Manager.Scene.Camera.Height))
             {
+                if (!e.Active)
+                {
+                    continue;
+                }
+
                 bool intersection = GameMath.LineOnRectIntersection(startPos, endPos,
                                                                     e.Position.X - e.Width / 2,
                                                                     e.Position.Y - e.Height / 2,
@@ -331,7 +336,7 @@ namespace ChargeGame
                 int validCol = 0;
                 foreach (Enemy e in collidingEnemies)
                 {
-                    if (!e.ForRemoval)
+                    if (!e.ForRemoval && e.Active)
                     {
                         e.Hit();
                         validCol++;

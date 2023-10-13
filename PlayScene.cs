@@ -365,10 +365,11 @@ namespace ChargeGame
             stack.AddElement(healthStack);
 
             // draw score number
-            scoreDisplay = new(new(6, 0), Resources.NumbersBig)
+            scoreDisplay = new(new(0, 0), Resources.NumbersBig)
             {
                 Value = 0,
             };
+            scoreDisplay.BoxModel.Padding = new(0f, 0f, 15f, 0f);
             stack.AddElement(scoreDisplay);
 
             UIManager.AddElement(stack);

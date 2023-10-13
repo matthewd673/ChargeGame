@@ -16,6 +16,7 @@ namespace ChargeGame
         public static Sprite Enemy { get; private set; }
 		public static Animation EnemyWalk { get; private set; }
 		public static Animation EnemyWalkLeft { get; private set; }
+		public static Animation EnemySpawn { get; private set; }
 
 		public static Sprite DemonPumpkin { get; private set; }
 		public static Sprite PumpkinLightStatic { get; private set; }
@@ -44,6 +45,7 @@ namespace ChargeGame
 			Enemy = content.Load<Texture2D>("enemy");
 			EnemyWalk = new(content.Load<Texture2D>("enemy_walk"), 10, 12, looping: true);
 			EnemyWalkLeft = new(content.Load<Texture2D>("enemy_walk_left"), 10, 12, looping: true);
+			EnemySpawn = new(content.Load<Texture2D>("enemy_spawn"), 10, 12, looping: false);
 
 			DemonPumpkin = content.Load<Texture2D>("demon_pumpkin");
 			PumpkinLightStatic = content.Load<Texture2D>("pumpkin_light_static");

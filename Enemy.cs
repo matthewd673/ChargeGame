@@ -27,8 +27,10 @@ namespace ChargeGame
 		private Animation enemyWalkRight;
 		private Animation enemyWalkLeft;
 
+		public bool Active { get; private set; } = false;
+
 		public Enemy(Vec2 position, Player player)
-			: base(Resources.EnemyWalk, position, 10, 19, 100f)
+			: base(Resources.EnemySpawn, position, 10, 19, 100f)
 		{
 			this.player = player;
 
@@ -36,6 +38,11 @@ namespace ChargeGame
             Friction = 0.7f;
 			ZIndexMode = EntityManager.ZIndexMode.Bottom;
 
+			// make active once spawning is finished
+			((Animation)Sprite).OnComplete = (Animation a) =>
+			{
+				Active = true;
+			};
 			enemyWalkRight = Resources.EnemyWalk.Copy();
 			enemyWalkLeft = Resources.EnemyWalkLeft.Copy();
 
@@ -46,15 +53,10 @@ namespace ChargeGame
         {
             base.Update();
 
-			Acceleration = GameMath.AngleToVec2(GameMath.AngleBetweenPoints(Position, player.Position));
-
-			if (Acceleration.X >= 0)
+			if (Active)
 			{
-				Sprite = enemyWalkRight;
-			}
-			else
-			{
-				Sprite = enemyWalkLeft;
+                Acceleration = GameMath.AngleToVec2(GameMath.AngleBetweenPoints(Position, player.Position));
+                Sprite = Acceleration.X >= 0 ? enemyWalkRight : enemyWalkLeft;
 			}
         }
 

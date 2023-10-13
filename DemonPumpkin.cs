@@ -15,10 +15,6 @@ namespace ChargeGame
         public override void OnAdd()
         {
             base.OnAdd();
-
-			//Verdant.Debugging.Log.WriteLine("First on add success");
-			Verdant.Debugging.Log.WriteLine(Manager);
-
 			Manager.AddEntity(new PumpkinLight(Position + new Vec2(0, 8)));
         }
     }
@@ -31,13 +27,6 @@ namespace ChargeGame
 			ZIndexMode = EntityManager.ZIndexMode.Manual;
 			ZIndex = int.MinValue;
 		}
-
-        public override void OnAdd()
-        {
-            base.OnAdd();
-
-			Verdant.Debugging.Log.WriteLine("add light");
-        }
     }
 }
 

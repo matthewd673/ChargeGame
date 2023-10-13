@@ -11,14 +11,17 @@ namespace ChargeGame
         public static Animation Spark { get; private set; }
         public static Sprite Aim { get; private set; }
 		public static Sprite AimHead { get; private set; }
+        public static Sprite X { get; private set; }
 
-		public static Sprite Enemy { get; private set; }
+        public static Sprite Enemy { get; private set; }
 
 		public static Sprite DemonPumpkin { get; private set; }
 		public static Sprite PumpkinLightStatic { get; private set; }
 		public static Animation PumpkinLightFlicker { get; private set; }
 
 		public static Animation Gem { get; private set; }
+
+		public static SpriteSheet WallSheet { get; private set; }
 
 		public static SpriteSheet NumbersBig { get; private set; }
 		public static SpriteSheet NumbersSmall { get; private set; }
@@ -33,6 +36,7 @@ namespace ChargeGame
 						10, 2, looping: false);
 			Aim = content.Load<Texture2D>("aim");
 			AimHead = content.Load<Texture2D>("aim_head");
+			X = content.Load<Texture2D>("x");
 
 			Enemy = content.Load<Texture2D>("enemy");
 
@@ -43,6 +47,8 @@ namespace ChargeGame
 
 			Gem = new(content.Load<Texture2D>("gem"),
 					  10, 12, looping: true);
+
+			WallSheet = new(content.Load<Texture2D>("wall_sheet"), 10);
 
 			NumbersBig = new(content.Load<Texture2D>("numbers_big"), 7);
 			NumbersSmall = new(content.Load<Texture2D>("numbers_small"), 4);

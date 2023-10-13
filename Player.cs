@@ -63,8 +63,9 @@ namespace ChargeGame
         private Vec2 dashStartPos = new();
         private Vec2 dashTargetPos = new();
 
+        private Vec2 dashCollisionPos = null;
+
         private List<SlashPath> slashPaths = new();
-        private List<Vec2> slashPoints = new();
         private int lastSlashCount = 0;
 
         private bool slashAnimationTimerCompleted = false;
@@ -101,7 +102,6 @@ namespace ChargeGame
                 if (chainingDash)
                 {
                     slashPaths.Clear();
-                    slashPoints.Clear();
                     scoreMultiplier = 1;
                 }
             });
@@ -161,6 +161,12 @@ namespace ChargeGame
                 dashStartPos = Position.Copy();
                 dashTargetPos = Position + GameMath.AngleToVec2(moveAngle) * CurrentDashDist;
 
+                if (dashCollisionPos != null)
+                {
+                    // subtraction just offsets a bit to prevent hopping the wall
+                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle);
+                }
+
                 // reset timer
                 dashChargeTimerCompleted = false;
                 dashChargeTimer.Reset();
@@ -168,6 +174,25 @@ namespace ChargeGame
                 // begin slash animation
                 slashAnimationTimerCompleted = false;
                 slashAnimationTimer.Restart();
+            }
+
+            // check for wall collisions
+            dashCollisionPos = null;
+            foreach (Boundary b in PlayScene.Boundaries)
+            {
+                Vec2 aimTargetPos = Position + GameMath.AngleToVec2(moveAngle) * CurrentDashDist;
+                Vec2 point = GameMath.LineIntersectionPoint(b.Start, b.End, Position, aimTargetPos);
+
+                if (point == null)
+                {
+                    continue;
+                }
+
+                if (dashCollisionPos == null ||
+                     GameMath.DistanceBetweenPoints(Position, point) < GameMath.DistanceBetweenPoints(Position, dashCollisionPos))
+                {
+                    dashCollisionPos = point;
+                }
             }
 
             bool wasDashing = dashing;
@@ -219,16 +244,16 @@ namespace ChargeGame
                 (int) Manager.Scene.Camera.Width,
                 (int) Manager.Scene.Camera.Height))
             {
-                List<Vec2> points = GameMath.LineOnRectIntersectionPoints(startPos, endPos,
-                                                                            e.Position.X - e.Width / 2,
-                                                                            e.Position.Y - e.Height / 2,
-                                                                            e.Position.X + e.Width / 2,
-                                                                            e.Position.Y + e.Height / 2);
-                slashPoints.AddRange(points);
+                bool intersection = GameMath.LineOnRectIntersection(startPos, endPos,
+                                                                    e.Position.X - e.Width / 2,
+                                                                    e.Position.Y - e.Height / 2,
+                                                                    e.Position.X + e.Width / 2,
+                                                                    e.Position.Y + e.Height / 2);
 
-                if (points.Count > 0)
+                if (intersection)
                 {
                     e.Hit();
+                    lastSlashCount += 1;
                     PlayScene.Score += (long)(scoreEnemy * scoreMultiplier);
                 }
 
@@ -236,8 +261,6 @@ namespace ChargeGame
                 {
                     scoreMultiplier += 0.2f;
                 }
-
-                lastSlashCount += points.Count;
             }
 
             // try to slash all gems within camera bounds
@@ -246,21 +269,20 @@ namespace ChargeGame
                 (int) Manager.Scene.Camera.Width,
                 (int) Manager.Scene.Camera.Height))
             {
-                List<Vec2> points = GameMath.LineOnRectIntersectionPoints(startPos, endPos,
-                                                                          g.Position.X - g.Width / 2,
-                                                                          g.Position.Y - g.Height / 2,
-                                                                          g.Position.X + g.Width / 2,
-                                                                          g.Position.Y + g.Height / 2);
-                slashPoints.AddRange(points);
+                bool intersection = GameMath.LineOnRectIntersection(startPos, endPos,
+                                                                    g.Position.X - g.Width / 2,
+                                                                    g.Position.Y - g.Height / 2,
+                                                                    g.Position.X + g.Width / 2,
+                                                                    g.Position.Y + g.Height / 2);
 
-                if (points.Count > 0)
+                if (intersection)
                 {
                     g.Collect();
+                    lastSlashCount += 1;
                     scoreMultiplier += scoreMultiplier += 0.5f;
                     PlayScene.Score += (long)(scoreGem * scoreMultiplier);
                 }
 
-                lastSlashCount += points.Count;
             }
 
             if (lastSlashCount > 0)
@@ -274,7 +296,6 @@ namespace ChargeGame
 
                 // missed the chain
                 slashPaths.Clear();
-                slashPoints.Clear();
                 scoreMultiplier = 1;
             }
         }
@@ -351,6 +372,19 @@ namespace ChargeGame
                              SpriteEffects.None,
                              0
                              );
+            // draw aim X
+            if (dashCollisionPos != null)
+            {
+                spriteBatch.Draw(Resources.X.Texture,
+                                 new Microsoft.Xna.Framework.Rectangle(
+                                     (int)(dashCollisionPos.X - Resources.X.Width / 2) * Renderer.WorldScale,
+                                     (int)(dashCollisionPos.Y - Resources.X.Height / 2) * Renderer.WorldScale,
+                                     Resources.X.Width * Renderer.WorldScale,
+                                     Resources.X.Height * Renderer.WorldScale
+                                     ),
+                                 Color.White
+                                 );
+            }
 
             // draw slash paths
             for (int i = 0; i < slashPaths.Count; i++)
@@ -385,18 +419,6 @@ namespace ChargeGame
                                  0
                                  );
                 }
-            }
-
-            // draw slash points
-            foreach (Vec2 p in slashPoints)
-            {
-                spriteBatch.Draw(Renderer.Pixel,
-                                 new Microsoft.Xna.Framework.Rectangle(
-                                     Manager.Scene.Camera.GetRenderPosition(p).X,
-                                     Manager.Scene.Camera.GetRenderPosition(p).Y,
-                                     4,
-                                     4),
-                                 Color.Magenta);
             }
 
             // draw player

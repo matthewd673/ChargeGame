@@ -41,8 +41,8 @@ namespace ChargeGame
 			{
 				FontSheet.DrawIndex(spriteBatch,
 									new Rectangle(
-										(int)AbsoluteContentPosition.X + (drawOffset * Renderer.UIScale),
-										(int)AbsoluteContentPosition.Y,
+										(int)(AbsoluteContentPosition.X + drawOffset) * Renderer.UIScale,
+										(int)AbsoluteContentPosition.Y * Renderer.UIScale,
 										FontSheet.Width * Renderer.UIScale,
 										FontSheet.Height * Renderer.UIScale
 										),
@@ -51,7 +51,7 @@ namespace ChargeGame
 				drawOffset += FontSheet.Width;
 			}
 
-			base.DrawBounds(spriteBatch);
+			//base.DrawBounds(spriteBatch);
 		}
     }
 }

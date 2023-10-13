@@ -72,13 +72,14 @@ namespace ChargeGame
         private const float slashAnimationDuration = 150f;
         private Timer slashAnimationTimer;
 
-        private int _hitPoints = 3;
+        private int _hitPoints;
         public int HitPoints
         {
             get { return _hitPoints; }
             set
             {
                 _hitPoints = value;
+                PlayScene.ReportedHealth = _hitPoints;
                 if (_hitPoints <= 0)
                 {
                     Die();
@@ -110,6 +111,13 @@ namespace ChargeGame
             {
                 slashAnimationTimerCompleted = true;
             });
+        }
+
+        public override void OnAdd()
+        {
+            base.OnAdd();
+
+            HitPoints = 3; // starting health
         }
 
         public override void Update()
@@ -157,7 +165,7 @@ namespace ChargeGame
                 if (dashCollisionPos != null)
                 {
                     // subtraction just offsets a bit to prevent hopping the wall
-                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle)*2;
+                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle)*4;
                 }
 
                 // reset timer
@@ -319,13 +327,28 @@ namespace ChargeGame
             // take damage from enemies while not dashing
             if (!dashing)
             {
-                // TODO
+                List<Enemy> collidingEnemies = GetColliding<Enemy>();
+                int validCol = 0;
+                foreach (Enemy e in collidingEnemies)
+                {
+                    if (!e.ForRemoval)
+                    {
+                        e.Hit();
+                        validCol++;
+                    }
+                }
+
+                if (validCol > 0)
+                {
+                    Hit();
+                }
             }
         }
 
         private void Hit()
         {
             HitPoints -= 1;
+            Manager.Scene.Camera.SetShake(3, 400f);
         }
 
         private void Die()

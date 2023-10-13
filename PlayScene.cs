@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Verdant;
 using Verdant.Physics;
+using Verdant.UI;
 
 namespace ChargeGame
 {
@@ -25,6 +26,20 @@ namespace ChargeGame
             }
         }
         private UINumericDisplay scoreDisplay;
+        private int _reportedHealth = 0;
+        public int ReportedHealth
+        {
+            get { return _reportedHealth; }
+            set
+            {
+                _reportedHealth = value;
+                healthDisplay.Value = _reportedHealth;
+
+                healthSprite.SpriteIndex = 3 - _reportedHealth;
+            }
+        }
+        private UINumericDisplay healthDisplay;
+        private UISprite healthSprite;
 
         public List<Boundary> Boundaries { get; private set; }
         public List<Vec2> SpawnCandidates { get; private set; }
@@ -44,8 +59,8 @@ namespace ChargeGame
             EntityManager = new(32); // magic number, constrained because demon pumpkin is 33 wide so must be ~ >16 or something
             EntityManager.Scene = this;
 
-            GenerateWorld();
             GenerateUI();
+            GenerateWorld();
 
             director = new(EntityManager, SpawnCandidates, player);
         }
@@ -324,10 +339,39 @@ namespace ChargeGame
 
         private void GenerateUI()
         {
-            scoreDisplay = new(new(8, 8), Resources.NumbersBig);
-            scoreDisplay.FontSheetOffset = 10;
+            UIStack stack = new(new(8, 8))
+            {
+                Gap = 2,
+            };
 
-            UIManager.AddElement(scoreDisplay);
+            // draw health icon + number
+            UIStack healthStack = new(new(), vertical: false)
+            {
+                Gap = 2,
+            };
+
+            healthSprite = new(Resources.Heart, new())
+            {
+                SpriteIndex = 0,
+            };
+            healthStack.AddElement(healthSprite);
+
+            healthDisplay = new(new(), Resources.NumbersBig)
+            {
+                FontSheetOffset = 10,
+            };
+            healthStack.AddElement(healthDisplay);
+
+            stack.AddElement(healthStack);
+
+            // draw score number
+            scoreDisplay = new(new(6, 0), Resources.NumbersBig)
+            {
+                Value = 0,
+            };
+            stack.AddElement(scoreDisplay);
+
+            UIManager.AddElement(stack);
         }
     }
 }

@@ -25,6 +25,7 @@ namespace ChargeGame
 
 		public static SpriteSheet NumbersBig { get; private set; }
 		public static SpriteSheet NumbersSmall { get; private set; }
+		public static SpriteSheet Heart { get; private set; }
 		public static Sprite Cursor { get; private set; }
 
 		public static void LoadResources(ContentManager content)
@@ -52,6 +53,7 @@ namespace ChargeGame
 
 			NumbersBig = new(content.Load<Texture2D>("numbers_big"), 7);
 			NumbersSmall = new(content.Load<Texture2D>("numbers_small"), 4);
+			Heart = new(content.Load<Texture2D>("heart"), 13);
 			Cursor = content.Load<Texture2D>("cursor");
 		}
 	}

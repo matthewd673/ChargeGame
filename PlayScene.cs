@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Verdant;
 using Verdant.Physics;
 
@@ -28,6 +29,10 @@ namespace ChargeGame
         public List<Boundary> Boundaries { get; private set; }
         public List<Vec2> SpawnCandidates { get; private set; }
 
+        private Player player;
+
+        private Director director;
+
         public PlayScene() : base("play")
 		{
             // Empty
@@ -41,6 +46,15 @@ namespace ChargeGame
 
             GenerateWorld();
             GenerateUI();
+
+            director = new(EntityManager, SpawnCandidates, player);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            //director.Update();
         }
 
         private void GenerateWorld()
@@ -298,13 +312,13 @@ namespace ChargeGame
             List<Vec2> possiblePlayerSpawns = new();
             foreach (Vec2 s in SpawnCandidates)
             {
-                if (GameMath.DistanceBetweenPoints(s, centerMost) > 20 &&
-                    GameMath.DistanceBetweenPoints(s, centerMost) < 50)
+                if (GameMath.DistanceBetweenPoints(s, centerMost) > 30 &&
+                    GameMath.DistanceBetweenPoints(s, centerMost) < 70)
                 {
                     possiblePlayerSpawns.Add(s);
                 }
             }
-            Player player = new(possiblePlayerSpawns[GameMath.Random.Next(possiblePlayerSpawns.Count)]);
+            player = new(possiblePlayerSpawns[GameMath.Random.Next(possiblePlayerSpawns.Count)]);
             EntityManager.AddEntity(player);
         }
 

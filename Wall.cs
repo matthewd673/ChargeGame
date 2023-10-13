@@ -21,6 +21,7 @@ namespace ChargeGame
 			: base(Resources.WallSheet, position, WallWidth, WallHeight)
 		{
 			this.style = style;
+			ZIndexMode = EntityManager.ZIndexMode.Bottom;
 		}
 
         public override void Draw(SpriteBatch spriteBatch)

@@ -21,15 +21,28 @@ namespace ChargeGame
 			}
 		}
 
-		public Enemy(Vec2 position)
+		private Player player;
+
+		public Enemy(Vec2 position, Player player)
 			: base(Resources.Enemy, position, 7, 21, 100f)
 		{
+			this.player = player;
+
             AngleFriction = 1f; // prevent rotation
             Friction = 0.7f;
 			ZIndexMode = EntityManager.ZIndexMode.Bottom;
+
+			Speed = GameMath.RandomFloat(0.6f, 0.9f);
         }
 
-		public void Hit()
+        public override void Update()
+        {
+            base.Update();
+
+			Acceleration = GameMath.AngleToVec2(GameMath.AngleBetweenPoints(Position, player.Position));
+        }
+
+        public void Hit()
 		{
 			HitPoints -= 1;
 		}

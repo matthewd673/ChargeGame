@@ -69,7 +69,7 @@ namespace ChargeGame
         private int lastSlashCount = 0;
 
         private bool slashAnimationTimerCompleted = false;
-        private const float slashAnimationDuration = 100f;
+        private const float slashAnimationDuration = 150f;
         private Timer slashAnimationTimer;
 
         private int _hitPoints = 3;
@@ -128,15 +128,8 @@ namespace ChargeGame
             moveAngle = GameMath.AngleBetweenPoints(Position, mouseWorldPos);
 
             // movement
-            //if (InputHandler.KeyboardState.IsKeyDown(Keys.W))
-            //{
-            //    Acceleration = GameMath.AngleToVec2(moveAngle) * moveSpeed;
-            //}
-            //else
-            //{
-                Acceleration.X = 0;
-                Acceleration.Y = 0;
-            //}
+            Acceleration.X = 0;
+            Acceleration.Y = 0;
 
             // only start timer once
             // this is to prevent the timer from restarting
@@ -164,7 +157,7 @@ namespace ChargeGame
                 if (dashCollisionPos != null)
                 {
                     // subtraction just offsets a bit to prevent hopping the wall
-                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle);
+                    dashTargetPos = dashCollisionPos - GameMath.AngleToVec2(moveAngle)*2;
                 }
 
                 // reset timer
@@ -201,12 +194,16 @@ namespace ChargeGame
                 Vec2 stepVec = Position - dashTargetPos;
                 Acceleration = stepVec;
 
+                // reach the dash target pos and stop
                 if (GameMath.DistanceBetweenPoints(Position, dashTargetPos) < 0.3f)
                 {
                     dashing = false;
                 }
-                // 1.85 is the magic number, no idea why
-                Velocity = (Position - dashTargetPos) / (1 - 1.85f*Friction); // magic number
+                else
+                {
+                    // 1.85 is the magic number, no idea why
+                    Velocity = (Position - dashTargetPos) / (1 - 1.85f * Friction); // magic number
+                }
             }
 
             // check if dash just ended
